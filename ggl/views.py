@@ -1,4 +1,6 @@
 
+from distutils.util import strtobool
+
 from flask import abort, jsonify, request, Blueprint
 
 from ggl.models import db, Task
@@ -26,3 +28,23 @@ def create_task():
     db.session.commit()
 
     return jsonify(result=task.to_json())
+
+
+@bp.route('/task/<int:task_id>', methods=['PUT'])
+def edit_task(task_id):
+    task = Task.query.get(task_id)
+    if not task:
+        abort(404)
+
+    data = request.get_json()
+    try:
+        name = data['name']
+        status = strtobool(str(data['status']))
+    except (TypeError, KeyError, ValueError):
+        abort(400)
+
+    task.name = name
+    task.status = status
+    db.session.commit()
+
+    return jsonify(task.to_json())

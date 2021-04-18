@@ -76,3 +76,47 @@ def test_task_create(app, client, db):
     id = result_data['result']['id']
     task = Task.query.get(id)
     assert task.to_json() == result_data['result']
+
+
+def test_task_edit(app, client, db):
+    task = Task(name='task_01', status=False)
+    db.session.add(task)
+    db.session.commit()
+
+    url = f'/task/{task.id}'
+
+    result = client.put(url)
+    assert 400 == result.status_code
+
+    result = client.put(url, content_type='application/json')
+    assert 400 == result.status_code
+
+    result = client.put(url, data=json.dumps({}), content_type='application/json')
+    assert 400 == result.status_code
+
+    post_data = {
+        'id': task.id,
+        'name': 'task_edit',
+        'status': 1,
+    }
+
+    data = post_data.copy()
+    data['id'] = 10000
+    result = client.put(f'/task/{data["id"]}', data=json.dumps(data), content_type='application/json')
+    assert 404 == result.status_code
+
+    data = post_data.copy()
+    data['status'] = 'error_status'
+    result = client.put(url, data=json.dumps(data), content_type='application/json')
+    assert 400 == result.status_code
+
+    result = client.put(url, data=json.dumps(post_data), content_type='application/json')
+    assert 200 == result.status_code
+
+    result_data = result.get_json()
+    assert task.id == result_data['id']
+    assert post_data['name'] == result_data['name']
+    assert post_data['status'] == result_data['status']
+
+    db.session.refresh(task)
+    assert task.to_json() == result_data
