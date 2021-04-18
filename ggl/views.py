@@ -3,7 +3,7 @@ from distutils.util import strtobool
 
 from flask import abort, jsonify, request, Response, Blueprint
 
-from ggl.models import db, Task
+from models import db, Task
 
 bp = Blueprint('task', __name__)
 
