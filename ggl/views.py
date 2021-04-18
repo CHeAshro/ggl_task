@@ -1,7 +1,7 @@
 
 from distutils.util import strtobool
 
-from flask import abort, jsonify, request, Blueprint
+from flask import abort, jsonify, request, Response, Blueprint
 
 from ggl.models import db, Task
 
@@ -48,3 +48,15 @@ def edit_task(task_id):
     db.session.commit()
 
     return jsonify(task.to_json())
+
+
+@bp.route('/task/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    task = Task.query.get(task_id)
+    if not task:
+        abort(404)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return Response(status=200)

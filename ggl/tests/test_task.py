@@ -120,3 +120,17 @@ def test_task_edit(app, client, db):
 
     db.session.refresh(task)
     assert task.to_json() == result_data
+
+
+def test_task_delete(app, client, db):
+    task = Task(name='task_01', status=False)
+    db.session.add(task)
+    db.session.commit()
+
+    result = client.delete('/task/10000')
+    assert 404 == result.status_code
+
+    result = client.delete(f'/task/{task.id}')
+    assert 200 == result.status_code
+
+    assert not db.session.query(Task.id).filter_by(id=task.id).scalar()
