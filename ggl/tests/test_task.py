@@ -1,4 +1,6 @@
 
+import json
+
 import pytest
 
 from ggl.app import create_app
@@ -47,3 +49,30 @@ def test_task_list(app, client, db):
         ]
     }
     assert expect_result == result.get_json()
+
+
+def test_task_create(app, client, db):
+    url = '/task'
+
+    result = client.post(url)
+    assert 400 == result.status_code
+
+    result = client.post(url, content_type='application/json')
+    assert 400 == result.status_code
+
+    result = client.post(url, data=json.dumps({}), content_type='application/json')
+    assert 400 == result.status_code
+
+    post_data = {
+        'name': 'task_01',
+    }
+    result = client.post(url, data=json.dumps(post_data), content_type='application/json')
+    assert 200 == result.status_code
+
+    result_data = result.get_json()
+    assert post_data['name'] == result_data['result']['name']
+    assert 0 == result_data['result']['status']
+
+    id = result_data['result']['id']
+    task = Task.query.get(id)
+    assert task.to_json() == result_data['result']
