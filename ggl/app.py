@@ -16,7 +16,7 @@ def create_app(type=None):
         flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         flask_app.config['TESTING'] = True
     else:
-        flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://ggl:1234@127.0.0.1:3306/ggl'
+        flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://ggl:1234@db:3306/ggl'
 
     db.init_app(flask_app)
     migrate.init_app(flask_app, db)
